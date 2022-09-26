@@ -4,6 +4,7 @@ exports.event = void 0;
 exports.event = {
     eventType: "CREATE_ROOM",
     event(c, data, token, user, users, games) {
+        console.log(user);
         user.room = (Date.now() +
             +([...Array(10)].map(() => Math.floor(Math.random() * 10)).join(""))).toString(16);
         let game = {

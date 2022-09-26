@@ -1,9 +1,10 @@
 import { EventFile, EventClientData, Game } from "../Interface/Events";
 
-
 export const event: EventFile = {
     eventType: "CREATE_ROOM",
     event(c, data: EventClientData["CREATE_ROOM"], token, user, users, games) {
+        console.log(user);
+        
         user.room = (
             Date.now() +
             +(

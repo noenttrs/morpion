@@ -33,8 +33,9 @@ export interface User {
     id: {
         adress: string;
         port: number;
-    }
-    room: string
+    };
+    c: connection;
+    room: string;
 }
 
 export interface Game {

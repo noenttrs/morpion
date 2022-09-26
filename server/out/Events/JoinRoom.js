@@ -13,11 +13,13 @@ exports.event = {
                 }
             }));
         game.invite = token;
-        c.send(JSON.stringify({
+        let toSend = JSON.stringify({
             event: "JOIN_ROOM",
             data: {
                 whoStart: games[data.inviteCode].whoStart
             }
-        }));
+        });
+        c.send(toSend);
+        users[game.creator].c.send(toSend);
     }
 };
