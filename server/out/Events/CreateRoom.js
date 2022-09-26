@@ -12,6 +12,7 @@ exports.event = {
             creator: token,
             invite: null,
             whoStart: Math.floor(Math.random()),
+            count: 0,
             board: []
         };
         switch (data.game) {

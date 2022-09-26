@@ -43,6 +43,7 @@ export interface Game {
     creator: string;
     invite: string | null;
     whoStart: number;
+    count: number;
     board: string[][];
 }
 

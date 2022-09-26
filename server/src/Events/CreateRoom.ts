@@ -19,6 +19,7 @@ export const event: EventFile = {
             creator: token,
             invite: null,
             whoStart: Math.floor(Math.random()),
+            count: 0,
             board: []
         }
 

@@ -14,7 +14,7 @@ let code;
         switch (msg.event) {
             case "CREATE_TOKEN":
                 wsClient.send(JSON.stringify({
-                    token: msg.token,
+                    token: msg.data.token,
                     event: "CREATE_ROOM",
                     data: {
                         game: "morpion"
@@ -24,7 +24,7 @@ let code;
                 
             case "CREATE_ROOM":
                 console.log(msg);
-                code = msg.invite
+                code = msg.data.invite
                 break;
                     
             default:
@@ -48,9 +48,9 @@ let code;
 
         switch (msg.event) {
             case "CREATE_TOKEN":
-                secondToken = msg.token
+                secondToken = msg.data.token
                 wsClientInvite.send(JSON.stringify({
-                    token: msg.token,
+                    token: msg.data.token,
                     event: "JOIN_ROOM",
                     data: {
                         invite: code
