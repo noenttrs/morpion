@@ -23,6 +23,22 @@ let events = {};
 let users = {};
 let closeRef = {};
 let games = {};
+app.get("/room", (req, res) => {
+    let id = req.query.id;
+    if (id === undefined)
+        return res.send({
+            error: "No id",
+            roomExist: false
+        });
+    if (games[id] === undefined || games[id].invite === null)
+        return res.send({
+            error: "This room doesn't exist",
+            roomExist: false
+        });
+    return res.send({
+        roomExist: true
+    });
+});
 ws.on("connect", (c) => {
     let token = (Date.now() +
         +([...Array(10)].map(() => Math.floor(Math.random() * 10)).join(""))).toString(16);

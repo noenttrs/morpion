@@ -2,7 +2,7 @@ import http from "http"
 import express from "express"
 import { server as wsServer } from "websocket"
 import { readdirSync } from "fs"
-import { EventsClient, EventFile } from "./Interface/Events"
+import { EventsClient, EventFile, Game } from "./Interface/Events"
 
 const app = express()
 const server = http.createServer(app)
@@ -25,7 +25,25 @@ readdirSync("./server/out/Events/")
 
 let users = {}
 let closeRef = {}
-let games = {}
+let games: { [key: string]: Game } = {}
+
+app.get("/room", (req, res) => {
+    let id = req.query.id as string | undefined
+    
+    if (id === undefined) return res.send({
+        error: "No id",
+        roomExist: false
+    })
+
+    if (games[id] === undefined || games[id].invite === null) return res.send({
+        error: "This room doesn't exist",
+        roomExist: false
+    })
+
+    return res.send({
+        roomExist: true
+    })
+})
 
 ws.on("connect", (c) => {
     let token = (
