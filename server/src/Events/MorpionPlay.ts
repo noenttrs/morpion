@@ -16,7 +16,7 @@ export const event: EventFile = {
             }
         }));
 
-        if (data.case === undefined) return;
+        if (data.col === undefined && data.row === undefined) return;
 
         let playFromInvite = game.invite === user.token
 
@@ -53,7 +53,7 @@ export const event: EventFile = {
         }
 
         if (game.count % 2 === game.whoStart && playFromInvite) {
-
+            
         } else {
 
         }

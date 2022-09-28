@@ -78,14 +78,19 @@ ws.on("connect", (c) => {
     c.on("message", (msg) => {
         if (msg.type !== "utf8") return
         
-        let { token, event, data } = JSON.parse(msg.utf8Data)
 
-        console.log({ token, data });
-
-        events[event](c, data, token, users[token], users, games)
-
-        console.log(users);
-        console.log(games);
+        try {
+            let { token, event, data } = JSON.parse(msg.utf8Data)
+    
+            console.log({ token, data });
+    
+            events[event](c, data, token, users[token], users, games)
+    
+            console.log(users);
+            console.log(games);
+        } catch (error) {
+            console.log(error);
+        }
     })
 })
 
@@ -100,3 +105,7 @@ ws.on("close", (c) => {
 })
 
 server.listen(3000, () => console.log("Server On on port : 3000"))
+
+setInterval(() => {
+
+}, 120000)

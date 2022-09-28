@@ -1,13 +1,25 @@
 import { connection } from "websocket"
 
-export type EventsServer = "JOIN_ROOM" | "MORPION_PLAY" | "MORPION_FINISH"
+export enum EventsServer {
+    CREATE_TOKEN = "CREATE_TOKEN",
+    CREATE_ROOM = "CREATE_ROOM",
+    JOIN_ROOM = "JOIN_ROOM",
+    MORPION_PLAY = "MORPION_PLAY",
+    MORPION_FINISH = "MORPION_FINISH",
+}
 
 export interface EventsServerData {
+    "CREATE_TOKEN": {
+        token: string
+    },
+    "CREATE_ROOM": {
+        inviteCode: string
+    },
     "JOIN_ROOM": {
         whoStart: number
     },
     "MORPION_PLAY": {
-        case: `${number}|${number}`
+        board: string[][]
     },
     "MORPION_FINISH": {
         whoWin: number
@@ -15,6 +27,7 @@ export interface EventsServerData {
 }
 
 export type EventsClient = "CREATE_ROOM" | "JOIN_ROOM" | "MORPION_PLAY"
+
 
 export interface EventClientData {
     "CREATE_ROOM": {
@@ -24,7 +37,8 @@ export interface EventClientData {
         inviteCode: string
     },
     "MORPION_PLAY": {
-        case: `${number}|${number}`;
+        col: number;
+        row: number;
     }
 }
 
@@ -49,5 +63,5 @@ export interface Game {
 
 export interface EventFile {
     eventType: EventsClient;
-    event: (c: connection, data, token: string, user: User, users: { [code: string]: User }, games: { [code: string]: Game }) => any;
+    event: (c: connection, data: any, token: string, user: User, users: { [code: string]: User }, games: { [code: string]: Game }) => any;
 }

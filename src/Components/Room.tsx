@@ -1,18 +1,20 @@
 import { useState } from "react"
 
 interface Props {
-	roomEvent: (event: "create" | "join", game: "morpion" | "4pow") => void;
+	setInviteCode: (value: string) => void,
+	inviteCode: string
+	roomEvent: (event: "create" | "join", game?: "morpion" | "4pow") => Promise<boolean>;
 }
 
-export default function Room ({ roomEvent }: Props) {
-	let [game, setGame] = useState<"morpion" | "4pow" | "">("")
-	let [code, setCode] = useState("")
+export default function Room ({ roomEvent, setInviteCode, inviteCode }: Props) {
+	let [game, setGame] = useState<"morpion" | "4pow">("morpion")
+	let [codeFound, setCodeFound] = useState(true)
 
-	function onClickRoom(event: "create" | "join") {
-		if (event === "create" && game !== "") return
-		else return roomEvent("create", "morpion")
-
-		// if (event === "join" && )
+	async function onClickRoom(event: "create" | "join") {
+		if (event === "create") return roomEvent("create", "morpion")
+		else if (event === "join") {
+			if (!(await roomEvent("join"))) setCodeFound(false)
+		}
 	}
 
 	return (
@@ -20,12 +22,11 @@ export default function Room ({ roomEvent }: Props) {
 			<div className="join-room">
 				<input 
 					onChange={
-						({ target: { value } }) => setCode(value)
+						({ target: { value } }) => setInviteCode(value)
 					}
-					value={code} 
+					value={inviteCode}
 					placeholder="Code d'invitation" 
-					className="h-16 w-full text-xl text-center border-2 border-white" 
-					minLength={4} 
+					className={`w-full h-16 text-xl text-center border-2 ${codeFound ? "border-white" : "border-red-400"}`} 
 					maxLength={20} 
 					type="text"
 				/>
