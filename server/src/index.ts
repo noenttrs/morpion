@@ -35,7 +35,7 @@ app.get("/room", (req, res) => {
         roomExist: false
     })
 
-    if (games[id] === undefined || games[id].invite === null) return res.send({
+    if (games[id] === undefined && games[id].invite === null) return res.send({
         error: "This room doesn't exist",
         roomExist: false
     })

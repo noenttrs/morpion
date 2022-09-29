@@ -16,7 +16,8 @@ export interface EventsServerData {
         inviteCode: string
     },
     "JOIN_ROOM": {
-        whoStart: number
+        whoStart: number;
+        game: "morpion" | "4pow"
     },
     "MORPION_PLAY": {
         board: string[][]

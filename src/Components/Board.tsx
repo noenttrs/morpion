@@ -22,24 +22,58 @@ export default function BoardMorpion ({
         return invitePropsCode === ""
     }, [invitePropsCode])
 
+    const [gameType, setGameType] = useState(game)
+
     let baseBoard = useMemo(() => {
-        if (userType === "creator") {
-            if (game === "morpion") return [...Array(3)].map(x => [...Array(3)].fill(""))
-            else if (game === "4pow") return [...Array(3)].map(x => [...Array(3)].fill(""))
-        }
+        if (gameType === "morpion") return [...Array(3)].map(x => [...Array(3)].fill(""))
+        else if (gameType === "4pow") return [...Array(3)].map(x => [...Array(3)].fill(""))
 
         return [...Array(3)].map(x => [...Array(3)].fill(""))
-    }, [])
+    }, [gameType])
 
+    const [ws, setWs] = useState<WebSocket>()
     const [board, setBoard] = useState<string[][]>(baseBoard)
     const [inviteCode, setInviteCode] = useState(invitePropsCode)
+    const [inviteJoin, setInviteJoin] = useState(false)
+    const [whoStart, setWhoStart] = useState()
+    const [count, setCounter] = useState(0)
+
+    let topSentence = useMemo(() => {
+        if (count % 2 === whoStart) {
+            switch (userType) {
+                case "invite":
+                    return "Votre tour"
+            
+                case "creator":
+                    return "Tour de l'autre joueur"
+            }
+        } else {
+            switch (userType) {
+                case "creator":
+                    return "Votre tour"
+            
+                case "invite":
+                    return "Tour de l'autre joueur"
+            }
+        }
+    }, [count, whoStart])
 
     function onPlay (col: number, row: number) {
+        if (ws === undefined) return
+        if (!inviteJoin) return
 
+        ws.send(JSON.stringify({
+            event: "MORPION_PLAY",
+            data: {
+                col,
+                row
+            }
+        }))
     }
 
     useEffect(() => {
         const ws = new WebSocket(`ws://localhost:3000/`, "echo-protocol");
+        setWs(ws)
 
         ws.onmessage = (msg) => {
             let { event, data }: {
@@ -56,13 +90,23 @@ export default function BoardMorpion ({
                         
                         token = data.token
 
-                        ws.send(JSON.stringify({
-                            token,
-                            event: "CREATE_ROOM",
-                            data: {
-                                game
-                            }
-                        }))
+                        if (userType === "creator") {
+                            ws.send(JSON.stringify({
+                                token,
+                                event: "CREATE_ROOM",
+                                data: {
+                                    game
+                                }
+                            }))
+                        } else if (userType === "invite") {
+                            ws.send(JSON.stringify({
+                                token,
+                                event: "JOIN_ROOM",
+                                data: {
+                                    inviteCode
+                                }
+                            }))
+                        }
                         break
 
                     case EventsServer.CREATE_ROOM:
@@ -72,17 +116,20 @@ export default function BoardMorpion ({
 
                         setInviteCode(data.inviteCode)
                         break
-                    
+
                     case EventsServer.JOIN_ROOM:
                         data = data as EventsServerData[typeof event]
 
+                        setInviteJoin(true)
+console.log(data);
 
+                        if (userType === "invite") setGameType(data.game)
                         break
 
                     case EventsServer.MORPION_PLAY:
                         data = data as EventsServerData[typeof event]
 
-                        
+                        setBoard(data.board)
                         break
 
                     default:
@@ -100,10 +147,11 @@ export default function BoardMorpion ({
         <Morpion
             onPlay={onPlay}
             inviteCode={inviteCode}
+            topSentence={topSentence}
             board={board}
             showCode={showCode}
         />
     )
     else if (game === "4pow") return <FourPow />
-    else return <div>Error</div>
+    else return <div>Chargement</div>
 }

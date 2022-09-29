@@ -21,10 +21,10 @@ function App({ url }: Props) {
     } else if (event === "join") {
       const res = await (await fetch(`http://${url}/room?id=${inviteCode}`)).json()
 
-      setUserType("invite")
-
-      if (res.roomExist) true
-      else return false
+      if (res.roomExist) {
+        setInRoom(true)
+        setUserType("invite")
+      }
     }
 
     return false

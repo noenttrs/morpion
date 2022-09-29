@@ -3,20 +3,20 @@ interface Props {
   inviteCode: string;
   showCode: boolean;
   onPlay: (col: number, row: number) => void;
+  topSentence: string;
 }
 
 export default function Morpion({
   showCode,
   inviteCode,
   board,
-  onPlay
+  onPlay,
+  topSentence
 }: Props) {
-
-
   return (
     <div className="morpion flex justify-center place-items-center h-full">
-      {showCode && <h1 className="text-3xl absolute top-0 mt-6">Code d'invitation : {inviteCode}</h1>}
-      {!showCode && <h1></h1>}
+      {showCode && <h1>Code d'invitation : {inviteCode}</h1>}
+      {!showCode && <h1>{topSentence}</h1>}
       <div className="board">
         {board.map((x, i) => {
           return <div className="cell" key={i}>

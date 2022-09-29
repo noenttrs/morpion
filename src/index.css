@@ -27,7 +27,7 @@
     @apply flex
   }
 
-  .morpion .board h1 {
+  .morpion h1 {
     @apply text-3xl absolute top-0 mt-6
   }
 

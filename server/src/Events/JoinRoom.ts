@@ -17,7 +17,8 @@ export const event: EventFile = {
         let toSend = JSON.stringify({
             event: "JOIN_ROOM",
             data: {
-                whoStart: games[data.inviteCode].whoStart
+                whoStart: games[data.inviteCode].whoStart,
+                game: game.type
             }
         })
 
