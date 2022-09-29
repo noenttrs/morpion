@@ -33,8 +33,12 @@
 
   .morpion .board div.cell:nth-child(2) {
     border: solid 1px white;
-    border-top: none;
-    border-bottom: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .morpion .board div.cell {
+    @apply flex flex-row
   }
 
   .morpion .board div.cell div {
@@ -47,8 +51,8 @@
 
   .morpion .board div.cell div:nth-child(2) {
     border: solid 1px white;;
-    border-left: none;
-    border-right: none;
+    border-top: none;
+    border-bottom: none;
   }
 }
 

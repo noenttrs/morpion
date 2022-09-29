@@ -22,14 +22,14 @@ export default function Morpion({
           return <div className="cell" id={`${i}`} key={i}>
             {x.map((y, j) => {
               if (y === "") return (
-                <div key={j} onClick={() => onPlay(j, i)} className="cursor-pointer">
+                <div key={j} onClick={() => onPlay(i, j)} className="cursor-pointer">
                   <span></span>
                 </div>
               )
 
               return (
-                <div className="cursor-default">
-                  <span key={j}>{y}</span>
+                <div key={j} className="cursor-default">
+                  <span>{y}</span>
                 </div>
               )
             })}

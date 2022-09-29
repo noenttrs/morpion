@@ -7,23 +7,23 @@ interface Props {
 }
 
 let game: "morpion" | "4pow";
+let userType: "invite" | "creator"
 
 function App({ url }: Props) {
   const [inviteCode, setInviteCode] = useState("")
   const [inRoom, setInRoom] = useState(false)
-  const [userType, setUserType] = useState<"creator" | "invite">("creator")
 
   async function roomEvent(event: "create" | "join", gameType?: "morpion" | "4pow"): Promise<boolean> {
     if (event === "create" && gameType !== undefined) {
       game = gameType
-      setUserType("creator")
+      userType = "creator"
       setInRoom(true)
     } else if (event === "join") {
       const res = await (await fetch(`http://${url}/room?id=${inviteCode}`)).json()
 
       if (res.roomExist) {
+        userType = "invite"
         setInRoom(true)
-        setUserType("invite")
       }
     }
 

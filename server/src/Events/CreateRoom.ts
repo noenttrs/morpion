@@ -3,7 +3,7 @@ import { EventFile, EventClientData, Game } from "../Interface/Events";
 export const event: EventFile = {
     eventType: "CREATE_ROOM",
     event(c, data: EventClientData["CREATE_ROOM"], token, user, users, games) {
-        console.log(user);
+        console.log("CREATE_ROOM");
         
         user.room = (
             Date.now() +
@@ -18,7 +18,7 @@ export const event: EventFile = {
             type: data.game,
             creator: token,
             invite: null,
-            whoStart: Math.floor(Math.random()),
+            whoStart: Math.round(Math.random()),
             count: 0,
             board: []
         }

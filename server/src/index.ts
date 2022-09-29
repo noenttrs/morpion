@@ -54,7 +54,7 @@ ws.on("connect", (c) => {
             ).join("")
         )
     ).toString(16)
-
+, 
     users[token] = {
         id: {
             adress: c.socket.remoteAddress,
@@ -82,12 +82,12 @@ ws.on("connect", (c) => {
         try {
             let { token, event, data } = JSON.parse(msg.utf8Data)
     
-            console.log({ token, data });
+            // console.log({ token, data });
     
             events[event](c, data, token, users[token], users, games)
     
-            console.log(users);
-            console.log(games);
+            // console.log(users);
+            // console.log(games);
         } catch (error) {
             console.log(error);
         }

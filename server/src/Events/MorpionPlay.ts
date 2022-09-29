@@ -19,10 +19,20 @@ console.log(game);
 
         if (data.col === undefined && data.row === undefined) return;
 
-        let playFromInvite = game.invite === user.token
+        let playFromWho = game.invite === user.token ? "invite" : "creator"
+        let wichTurn = game.count % 2 === game.whoStart ? "invite" : "creator"
 
-        if (game.count % 2 === game.whoStart && playFromInvite) game.board[data.col][data.row] = "x"
-        else game.board[data.col][data.row] = "o"
+        console.log(game.board);
+        
+        // if (wichTurn === playFromWho) game.board[data.col][data.row] = "x"
+        // else game.board[0][0] = "o"
+
+        game.board[data.col][data.row] = "x"
+
+        console.log(data.col, data.row);
+        
+        console.log(game.board);
+        
 
         let inviteWin = false
         let win = false

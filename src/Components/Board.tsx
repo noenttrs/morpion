@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { EventsServerData, EventsServer } from "../../server/src/Interface/Events"
 import FourPow from "./Boards/FourPow";
 import Morpion from "./Boards/Morpion";
@@ -12,16 +12,12 @@ export interface BoardProps {
 
 let token: string;
 
-export default function BoardMorpion ({ 
+export default function Board ({ 
     url,
     game, 
     invitePropsCode,
     userType
 }: BoardProps) {
-    let showCode = useMemo(() => {
-        return invitePropsCode === ""
-    }, [invitePropsCode])
-
     const [gameType, setGameType] = useState(game)
 
     let baseBoard = useMemo(() => {
@@ -29,6 +25,11 @@ export default function BoardMorpion ({
         else if (gameType === "4pow") return [...Array(3)].map(x => [...Array(3)].fill(""))
 
         return [...Array(3)].map(x => [...Array(3)].fill(""))
+        // return [
+        //     ["x", "o", "x"],
+        //     ["o", "x", "o"],
+        //     ["o", "o", "o"]
+        // ]
     }, [gameType])
 
     const [ws, setWs] = useState<WebSocket>()
@@ -37,38 +38,38 @@ export default function BoardMorpion ({
     const [inviteJoin, setInviteJoin] = useState(false)
     const [whoStart, setWhoStart] = useState<number>()
     const [count, setCounter] = useState(0)
+    const [showCode, setShowCode] = useState(userType === "creator")
 
-    let topSentence = useMemo(() => {
+    let [topSentence, wichTurn] = useMemo(() => {
         if (count % 2 === whoStart) {
             switch (userType) {
                 case "invite":
-                    return "Votre tour"
+                    return ["Votre tour", "invite"]
             
                 case "creator":
-                    return "Tour de l'autre joueur"
+                    return ["Tour de l'autre joueur", "invite"]
             }
         } else {
             switch (userType) {
                 case "creator":
-                    return "Votre tour"
+                    return ["Votre tour", "creator"]
             
                 case "invite":
-                    return "Tour de l'autre joueur"
+                    return ["Tour de l'autre joueur", "creator"]
             }
         }
     }, [count, whoStart])
 
     function onPlay (col: number, row: number) {
+        console.log(col, row);
+
         if (ws === undefined) return
         if (!inviteJoin) return
 
-        if (!(count % 2 === whoStart && userType === "invite")) return
+        if (wichTurn !== userType) return
 
         console.log("play");
         
-
-        setCounter(count + 1)
-
         ws.send(JSON.stringify({
             token,
             event: "MORPION_PLAY",
@@ -129,17 +130,19 @@ export default function BoardMorpion ({
                         data = data as EventsServerData[typeof event]
 
                         setInviteJoin(true)
-                        console.log(data);
 
                         if (userType === "invite") setGameType(data.game)
 
-                        
                         setWhoStart(data.whoStart)
+                        setShowCode(false)
                         break
 
                     case EventsServer.MORPION_PLAY:
                         data = data as EventsServerData[typeof event]
 
+                        console.log(data);
+                        
+                        setCounter(count + 1)
                         setBoard(data.board)
                         break
 
@@ -151,7 +154,11 @@ export default function BoardMorpion ({
             }
         }
 
-        return () => ws.close()
+        return () => {
+            console.log("close");
+            
+            ws.close()
+        }
     }, [])
 
     if (gameType === "morpion") return (
