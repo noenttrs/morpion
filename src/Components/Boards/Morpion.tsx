@@ -19,10 +19,10 @@ export default function Morpion({
       {!showCode && <h1>{topSentence}</h1>}
       <div className="board">
         {board.map((x, i) => {
-          return <div className="cell" key={i}>
+          return <div className="cell" id={`${i}`} key={i}>
             {x.map((y, j) => {
               if (y === "") return (
-                <div key={j} onClick={() => onPlay(i, j)} className="cursor-pointer">
+                <div key={j} onClick={() => onPlay(j, i)} className="cursor-pointer">
                   <span></span>
                 </div>
               )

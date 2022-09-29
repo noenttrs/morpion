@@ -12,7 +12,8 @@ export const event: EventFile = {
             }
         }))
         
-        game.invite = token;
+        game.invite = token
+        user.room = data.inviteCode
 
         let toSend = JSON.stringify({
             event: "JOIN_ROOM",

@@ -4,6 +4,7 @@ export const event: EventFile = {
     eventType: "MORPION_PLAY",
     event(c, data: EventClientData["MORPION_PLAY"], token, user, users, games) {
         let game = games[user.room]
+console.log(game);
 
         if (game.invite === null) return
 

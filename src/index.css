@@ -24,7 +24,7 @@
   }
 
   .morpion .board {
-    @apply flex
+    @apply grid
   }
 
   .morpion h1 {

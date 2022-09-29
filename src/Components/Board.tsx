@@ -35,7 +35,7 @@ export default function BoardMorpion ({
     const [board, setBoard] = useState<string[][]>(baseBoard)
     const [inviteCode, setInviteCode] = useState(invitePropsCode)
     const [inviteJoin, setInviteJoin] = useState(false)
-    const [whoStart, setWhoStart] = useState()
+    const [whoStart, setWhoStart] = useState<number>()
     const [count, setCounter] = useState(0)
 
     let topSentence = useMemo(() => {
@@ -62,7 +62,15 @@ export default function BoardMorpion ({
         if (ws === undefined) return
         if (!inviteJoin) return
 
+        if (!(count % 2 === whoStart && userType === "invite")) return
+
+        console.log("play");
+        
+
+        setCounter(count + 1)
+
         ws.send(JSON.stringify({
+            token,
             event: "MORPION_PLAY",
             data: {
                 col,
@@ -123,11 +131,10 @@ export default function BoardMorpion ({
                         setInviteJoin(true)
                         console.log(data);
 
-                        if (userType === "invite") {
-                            setGameType(data.game)
-                            console.log(data.game);
-                            
-                        }
+                        if (userType === "invite") setGameType(data.game)
+
+                        
+                        setWhoStart(data.whoStart)
                         break
 
                     case EventsServer.MORPION_PLAY:
