@@ -22,8 +22,8 @@ export default function Morpion({
           return <div className="cell" key={i}>
             {x.map((y, j) => {
               if (y === "") return (
-                <div onClick={() => onPlay(i, j)} className="cursor-pointer">
-                  <span key={j}></span>
+                <div key={j} onClick={() => onPlay(i, j)} className="cursor-pointer">
+                  <span></span>
                 </div>
               )
 

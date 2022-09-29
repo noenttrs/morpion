@@ -121,9 +121,13 @@ export default function BoardMorpion ({
                         data = data as EventsServerData[typeof event]
 
                         setInviteJoin(true)
-console.log(data);
+                        console.log(data);
 
-                        if (userType === "invite") setGameType(data.game)
+                        if (userType === "invite") {
+                            setGameType(data.game)
+                            console.log(data.game);
+                            
+                        }
                         break
 
                     case EventsServer.MORPION_PLAY:
@@ -143,7 +147,7 @@ console.log(data);
         return () => ws.close()
     }, [])
 
-    if (game === "morpion") return (
+    if (gameType === "morpion") return (
         <Morpion
             onPlay={onPlay}
             inviteCode={inviteCode}
@@ -152,6 +156,6 @@ console.log(data);
             showCode={showCode}
         />
     )
-    else if (game === "4pow") return <FourPow />
+    else if (gameType === "4pow") return <FourPow />
     else return <div>Chargement</div>
 }
