@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EventsServerData, EventsServer } from "../../server/src/Interface/Events"
 import FourPow from "./Boards/FourPow";
 import Morpion from "./Boards/Morpion";
@@ -32,13 +32,13 @@ export default function Board ({
         // ]
     }, [gameType])
 
-    const [ws, setWs] = useState<WebSocket>()
     const [board, setBoard] = useState<string[][]>(baseBoard)
     const [inviteCode, setInviteCode] = useState(invitePropsCode)
     const [inviteJoin, setInviteJoin] = useState(false)
     const [whoStart, setWhoStart] = useState<number>()
     const [count, setCounter] = useState(0)
     const [showCode, setShowCode] = useState(userType === "creator")
+    const [ws, setWs] = useState<WebSocket>()
 
     let [topSentence, wichTurn] = useMemo(() => {
         if (count % 2 === whoStart) {
@@ -80,9 +80,11 @@ export default function Board ({
         }))
     }
 
+    
     useEffect(() => {
         const ws = new WebSocket(`ws://localhost:3000/`, "echo-protocol");
         setWs(ws)
+        console.count()
 
         ws.onmessage = (msg) => {
             let { event, data }: {

@@ -54,7 +54,7 @@ ws.on("connect", (c) => {
             ).join("")
         )
     ).toString(16)
-, 
+
     users[token] = {
         id: {
             adress: c.socket.remoteAddress,

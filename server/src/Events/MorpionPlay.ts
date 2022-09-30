@@ -27,9 +27,10 @@ console.log(game);
         // if (wichTurn === playFromWho) game.board[data.col][data.row] = "x"
         // else game.board[0][0] = "o"
 
-        game.board[data.col][data.row] = "x"
+        game.board[0][0] = "x"
 
         console.log(data.col, data.row);
+        console.log(game.board[data.col][data.row]);
         
         console.log(game.board);
         
@@ -37,19 +38,19 @@ console.log(game);
         let inviteWin = false
         let win = false
 
-        for (const arr of game.board) {
-            if (arr.join("") === "xxx") {
-                if (game.whoStart === 0 && user.token === invite.token) inviteWin = true
+        // for (const arr of game.board) {
+        //     if (arr.join("") === "xxx") {
+        //         if (game.whoStart === 0 && user.token === invite.token) inviteWin = true
 
-                win = true
-            } else if (arr.join("") === "ooo") {
-                if (game.whoStart === 0 && user.token === invite.token) inviteWin = true
+        //         win = true
+        //     } else if (arr.join("") === "ooo") {
+        //         if (game.whoStart === 0 && user.token === invite.token) inviteWin = true
 
-                win = true
-            }
+        //         win = true
+        //     }
 
-            if (win) break
-        }
+        //     if (win) break
+        // }
 
         if (win) {
             creator.c.send(JSON.stringify({
