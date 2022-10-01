@@ -7,7 +7,8 @@ export interface BoardProps {
     url: string;
     game: "morpion" | "4pow"
     invitePropsCode: string,
-    userType: "creator" | "invite"
+    userType: "creator" | "invite",
+    ws: WebSocket
 }
 
 let token: string;
@@ -16,8 +17,15 @@ export default function Board ({
     url,
     game, 
     invitePropsCode,
-    userType
+    userType,
+    ws
 }: BoardProps) {
+    useEffect(() => {
+        return (() => {
+            console.count("board render");
+        })
+    }, [])
+
     const [gameType, setGameType] = useState(game)
 
     let baseBoard = useMemo(() => {
@@ -38,7 +46,6 @@ export default function Board ({
     const [whoStart, setWhoStart] = useState<number>()
     const [count, setCounter] = useState(0)
     const [showCode, setShowCode] = useState(userType === "creator")
-    const [ws, setWs] = useState<WebSocket>()
 
     let [topSentence, wichTurn] = useMemo(() => {
         if (count % 2 === whoStart) {
@@ -82,10 +89,6 @@ export default function Board ({
 
     
     useEffect(() => {
-        const ws = new WebSocket(`ws://localhost:3000/`, "echo-protocol");
-        setWs(ws)
-        console.count()
-
         ws.onmessage = (msg) => {
             let { event, data }: {
                 event: keyof EventsServerData,
@@ -157,9 +160,7 @@ export default function Board ({
         }
 
         return () => {
-            console.log("close");
-            
-            ws.close()
+            ws.onmessage = () => {}
         }
     }, [])
 

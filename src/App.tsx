@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Board from './Components/Board';
 import Room from './Components/Room'
 
@@ -8,6 +8,8 @@ interface Props {
 
 let game: "morpion" | "4pow";
 let userType: "invite" | "creator"
+
+const ws = new WebSocket(`ws://localhost:3000/`, "echo-protocol");
 
 function App({ url }: Props) {
   const [inviteCode, setInviteCode] = useState("")
@@ -33,7 +35,7 @@ function App({ url }: Props) {
   return (
     <div className="flex justify-center w-full h-full place-items-center">
       {!inRoom && <Room inviteCode={inviteCode} setInviteCode={setInviteCode} roomEvent={roomEvent} />}
-      {inRoom && <Board url={url} game={game} invitePropsCode={inviteCode} userType={userType} />}
+      {inRoom && <Board ws={ws} url={url} game={game} invitePropsCode={inviteCode} userType={userType} />}
     </div>
   )
 }
