@@ -25,6 +25,12 @@ let users = {}
 let closeRef = {}
 let games: { [key: string]: Game } = {}
 
+app.use("/assets", express.static("../dist/assets"))
+
+app.get("/", (req, res) => {
+    res.sendFile("../dist/index.html")
+})
+
 app.get("/room", (req, res) => {
     let id = req.query.id as string | undefined
     

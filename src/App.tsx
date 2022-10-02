@@ -3,16 +3,14 @@ import { Events, EventsServerData } from '../server/src/Interface/Events';
 import Board from './Components/Board';
 import Room from './Components/Room'
 
-interface Props {
-  url: string
-}
-
 let game: "morpion" | "4pow";
 let userType: "invite" | "creator"
 
-let ws = new WebSocket(`ws://localhost:3000/`, "echo-protocol")
+const url = (window as any).PROD as boolean ? window.location.host : "localhost:3000"
 
-function App({ url }: Props) {
+let ws = new WebSocket(`ws://${url}/`, "echo-protocol")
+
+function App () {
   const [token, setToken] = useState<string>("")
 
   useEffect(() => {
@@ -29,7 +27,7 @@ function App({ url }: Props) {
       }
 
       ws.onclose = () => {
-        ws = new WebSocket(`ws://localhost:3000/`, "echo-protocol")
+        ws = new WebSocket(`ws://${url}/`, "echo-protocol")
       }
     } catch (error) {
       console.log(error);
