@@ -3,6 +3,7 @@ import express from "express"
 import { server as wsServer } from "websocket"
 import { readdirSync } from "fs"
 import { Events, EventFile, Game, EventClientData } from "./Interface/Events"
+import { join } from "path"
 
 const app = express()
 const server = http.createServer(app)
@@ -25,10 +26,10 @@ let users = {}
 let closeRef = {}
 let games: { [key: string]: Game } = {}
 
-app.use("/assets", express.static("../dist/assets"))
+app.use("/assets", express.static(join(__dirname, "../dist/assets")))
 
 app.get("/", (req, res) => {
-    res.sendFile("../dist/index.html")
+    res.sendFile(join(__dirname, "../dist/index.html"))
 })
 
 app.get("/room", (req, res) => {
