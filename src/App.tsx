@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Events, EventsServerData } from '../server/src/Interface/Events';
 import Board from './Components/Board';
 import Room from './Components/Room'
 
@@ -9,9 +10,36 @@ interface Props {
 let game: "morpion" | "4pow";
 let userType: "invite" | "creator"
 
-const ws = new WebSocket(`ws://localhost:3000/`, "echo-protocol");
+let ws = new WebSocket(`ws://localhost:3000/`, "echo-protocol")
 
 function App({ url }: Props) {
+  const [token, setToken] = useState<string>("")
+
+  useEffect(() => {
+    console.count("app")
+
+    try {
+      ws.onmessage = msg => {
+        let { event, data }: {
+          event: keyof EventsServerData,
+          data: EventsServerData[Events]
+        } = JSON.parse(msg.data)
+
+        if (event === "CREATE_TOKEN") setToken((data as EventsServerData[typeof event]).token)
+      }
+
+      ws.onclose = () => {
+        ws = new WebSocket(`ws://localhost:3000/`, "echo-protocol")
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    return () => {
+      ws.onmessage = () => {}
+    }
+  }, [])
+
   const [inviteCode, setInviteCode] = useState("")
   const [inRoom, setInRoom] = useState(false)
 
@@ -19,12 +47,30 @@ function App({ url }: Props) {
     if (event === "create" && gameType !== undefined) {
       game = gameType
       userType = "creator"
+
+      ws.send(JSON.stringify({
+        token,
+        event: "CREATE_ROOM",
+        data: {
+          game
+        }
+      }))
+
       setInRoom(true)
     } else if (event === "join") {
       const res = await (await fetch(`http://${url}/room?id=${inviteCode}`)).json()
 
       if (res.roomExist) {
         userType = "invite"
+
+        ws.send(JSON.stringify({
+          token,
+          event: "JOIN_ROOM",
+          data: {
+            inviteCode
+          }
+        }))
+
         setInRoom(true)
       }
     }
@@ -34,8 +80,26 @@ function App({ url }: Props) {
 
   return (
     <div className="flex justify-center w-full h-full place-items-center">
-      {!inRoom && <Room inviteCode={inviteCode} setInviteCode={setInviteCode} roomEvent={roomEvent} />}
-      {inRoom && <Board ws={ws} url={url} game={game} invitePropsCode={inviteCode} userType={userType} />}
+      {
+        !inRoom && 
+        <Room 
+          inviteCode={inviteCode} 
+          setInviteCode={setInviteCode} 
+          roomEvent={roomEvent} 
+        />
+      }
+      {
+        inRoom && 
+        <Board 
+          ws={ws} 
+          token={token} 
+          url={url} 
+          game={game} 
+          invitePropsCode={inviteCode} 
+          userType={userType}
+          setInRoom={setInRoom}
+        />
+      }
     </div>
   )
 }

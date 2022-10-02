@@ -1,12 +1,12 @@
-import { EventFile, EventClientData } from "../Interface/Events";
+import { EventFile, EventClientData, Events } from "../Interface/Events";
 
 export const event: EventFile = {
-    eventType: "JOIN_ROOM",
-    event(c, data: EventClientData["JOIN_ROOM"], token, user, users, games) {
+    eventType: Events.JOIN_ROOM,
+    event(c, data: EventClientData[Events.JOIN_ROOM], token, user, users, games) {
         let game = games[data?.inviteCode]
         
         if (game === undefined) c.send(JSON.stringify({
-            event: "JOIN_ROOM",
+            event: Events.JOIN_ROOM,
             data: {
                 error: "Room doesn't exist"
             }
@@ -16,7 +16,7 @@ export const event: EventFile = {
         user.room = data.inviteCode
 
         let toSend = JSON.stringify({
-            event: "JOIN_ROOM",
+            event: Events.JOIN_ROOM,
             data: {
                 whoStart: games[data.inviteCode].whoStart,
                 game: game.type

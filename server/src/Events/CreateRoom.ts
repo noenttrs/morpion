@@ -1,10 +1,8 @@
-import { EventFile, EventClientData, Game } from "../Interface/Events";
+import { EventFile, EventClientData, Game, Events } from "../Interface/Events";
 
 export const event: EventFile = {
-    eventType: "CREATE_ROOM",
-    event(c, data: EventClientData["CREATE_ROOM"], token, user, users, games) {
-        console.log("CREATE_ROOM");
-        
+    eventType: Events.CREATE_ROOM,
+    event(c, data: EventClientData[Events.CREATE_ROOM], token, user, users, games) {
         user.room = (
             Date.now() +
             +(
@@ -16,6 +14,7 @@ export const event: EventFile = {
 
         let game: Game = {
             type: data.game,
+            timestamp: Date.now(),
             creator: token,
             invite: null,
             whoStart: Math.round(Math.random()),
@@ -28,7 +27,7 @@ export const event: EventFile = {
                 game.board = [...Array(3).fill([...Array(3).fill("")])]
 
                 c.send(JSON.stringify({
-                    event: "CREATE_ROOM",
+                    event: Events.CREATE_ROOM,
                     data: {
                         inviteCode: user.room
                     }

@@ -2,7 +2,7 @@ import http from "http"
 import express from "express"
 import { server as wsServer } from "websocket"
 import { readdirSync } from "fs"
-import { EventsClient, EventFile, Game } from "./Interface/Events"
+import { Events, EventFile, Game, EventClientData } from "./Interface/Events"
 
 const app = express()
 const server = http.createServer(app)
@@ -11,16 +11,14 @@ const ws = new wsServer({
     autoAcceptConnections: true
 })
 
-let events: {
-    [K in EventsClient]?: EventFile["event"]
-} = {}
+let events: Map<EventFile["eventType"], EventFile["event"]> = new Map()
 
 readdirSync("./server/out/Events/")
 .filter((x) => x.endsWith(".js"))
 .forEach((file) => {
     let { eventType, event } = require(`./Events/${file}`).event    
 
-    events[eventType] = event
+    events.set(eventType, event)
 })
 
 let users = {}
@@ -61,15 +59,16 @@ ws.on("connect", (c) => {
             port: c.socket.remotePort
         },
         c: c,
+        token,
         room: null
     }
 
     closeRef[`${c.socket.remoteAddress}:${c.socket.remotePort}`] = token
 
     c.send(JSON.stringify({
-        event: "CREATE_TOKEN",
+        event: Events.CREATE_TOKEN,
         data: {
-            token: token
+            token
         }
     }))
 
@@ -78,16 +77,14 @@ ws.on("connect", (c) => {
     c.on("message", (msg) => {
         if (msg.type !== "utf8") return
         
-
         try {
-            let { token, event, data } = JSON.parse(msg.utf8Data)
-    
-            // console.log({ token, data });
-    
-            events[event](c, data, token, users[token], users, games)
-    
-            // console.log(users);
-            // console.log(games);
+            let { token, event, data }: {
+                token: string,
+                event: Events,
+                data: EventClientData
+            } = JSON.parse(msg.utf8Data)
+            
+            events.get(event)?.call(this, c, data, token, users[token], users, games)
         } catch (error) {
             console.log(error);
         }
@@ -100,12 +97,19 @@ ws.on("close", (c) => {
 
     console.log(`Close connection : token : ${token}`);
 
+    if (users[token].room !== null) delete games[users[token].room]
+
     delete users[token]
     delete closeRef[ref]
 })
 
 server.listen(3000, () => console.log("Server On on port : 3000"))
 
+// Games cleanup interval
 setInterval(() => {
+    for(let id in games) {
+        let game = games[id]
 
+        if (game.timestamp >= Date.now() && game.invite === null) delete games[id]
+    }
 }, 120000)

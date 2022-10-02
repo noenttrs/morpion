@@ -1,10 +1,11 @@
-import { EventClientData, EventFile } from "../Interface/Events";
+import { Board, EventClientData, EventFile, Events } from "../Interface/Events";
 
 export const event: EventFile = {
-    eventType: "MORPION_PLAY",
-    event(c, data: EventClientData["MORPION_PLAY"], token, user, users, games) {
+    eventType: Events.MORPION_PLAY,
+    event(c, data: EventClientData[Events.MORPION_PLAY], token, user, users, games) {
+        if (user.room === null) return
+
         let game = games[user.room]
-console.log(game);
 
         if (game.invite === null) return
 
@@ -19,56 +20,91 @@ console.log(game);
 
         if (data.col === undefined && data.row === undefined) return;
 
-        let playFromWho = game.invite === user.token ? "invite" : "creator"
+        let playFromWho = game.invite === token ? "invite" : "creator"
         let wichTurn = game.count % 2 === game.whoStart ? "invite" : "creator"
 
-        console.log(game.board);
-        
-        // if (wichTurn === playFromWho) game.board[data.col][data.row] = "x"
-        // else game.board[0][0] = "o"
+        if (playFromWho !== wichTurn) return
 
-        game.board[0][0] = "x"
-
-        console.log(data.col, data.row);
-        console.log(game.board[data.col][data.row]);
+        let boardCol = game.board[data.col].slice()
         
-        console.log(game.board);
-        
+        boardCol[data.row] = playFromWho === "invite" ? "o" : "x"
+        game.board[data.col] = boardCol
 
         let inviteWin = false
         let win = false
 
-        // for (const arr of game.board) {
-        //     if (arr.join("") === "xxx") {
-        //         if (game.whoStart === 0 && user.token === invite.token) inviteWin = true
+        for (let i = 0; i < game.board.length; i++) {
+            let colJoin = ""
 
-        //         win = true
-        //     } else if (arr.join("") === "ooo") {
-        //         if (game.whoStart === 0 && user.token === invite.token) inviteWin = true
+            for (let j = 0; j < game.board.length; j++) {
+                colJoin += game.board[j][i]
+            }
 
-        //         win = true
-        //     }
+            // console.log(game.board[i].join(""));
+            // console.log(colJoin);
 
-        //     if (win) break
-        // }
+            if (
+                game.board[i].join("") === "xxx" || 
+                game.board[i].join("") === "ooo" ||
+                colJoin === "xxx" ||
+                colJoin === "ooo"
+            ) {
+                if (token === invite.token) inviteWin = true
 
-        if (win) {
+                win = true
+            }
+
+            if (win) break
+        }
+
+        if (!win) {
+            let checkDiagonal = (grid: Board) => {
+                if (win) return
+
+                let diagonalJoin = ""
+    
+                for (let j = 0; j < grid.length; j++) {
+                    diagonalJoin += grid[j][j]
+                }
+    
+                if (diagonalJoin === "xxx" || diagonalJoin === "ooo") {
+                    if (token === invite.token) inviteWin = true
+
+                    win = true
+                }
+            }
+
+            checkDiagonal(game.board)
+            checkDiagonal(game.board.slice().reverse())
+        }
+
+        game.count++
+
+        if (win || game.count === 9) {
             creator.c.send(JSON.stringify({
+                event: Events.MORPION_FINISH,
                 data: {
-                    win: !inviteWin,
+                    win: win ? !inviteWin : undefined,
+                    board: game.board
                 }
             }))
 
             invite.c.send(JSON.stringify({
+                event: Events.MORPION_FINISH,
                 data: {
-                    win: inviteWin,
+                    win: win ? inviteWin : undefined,
+                    board: game.board
                 }
             }))
+
+            delete games[user.room]
+            creator.room = null
+            invite.room = null
 
             return
         } else {
             let toSend = JSON.stringify({
-                event: "MORPION_PLAY",
+                event: Events.MORPION_PLAY,
                 data: {
                     board: game.board
                 }

@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { EventsServerData, EventsServer } from "../../server/src/Interface/Events"
+import { EventsServerData, Events } from "../../server/src/Interface/Events"
 import FourPow from "./Boards/FourPow";
 import Morpion from "./Boards/Morpion";
 
 export interface BoardProps {
     url: string;
-    game: "morpion" | "4pow"
-    invitePropsCode: string,
-    userType: "creator" | "invite",
-    ws: WebSocket
+    game: "morpion" | "4pow";
+    invitePropsCode: string;
+    userType: "creator" | "invite";
+    ws: WebSocket;
+    token: string;
+    setInRoom: (value: boolean) => void; 
 }
 
 let token: string;
@@ -18,14 +20,10 @@ export default function Board ({
     game, 
     invitePropsCode,
     userType,
-    ws
+    ws,
+    token,
+    setInRoom
 }: BoardProps) {
-    useEffect(() => {
-        return (() => {
-            console.count("board render");
-        })
-    }, [])
-
     const [gameType, setGameType] = useState(game)
 
     let baseBoard = useMemo(() => {
@@ -46,8 +44,15 @@ export default function Board ({
     const [whoStart, setWhoStart] = useState<number>()
     const [count, setCounter] = useState(0)
     const [showCode, setShowCode] = useState(userType === "creator")
+    const [win, setWin] = useState<boolean | undefined | null>(null)
 
     let [topSentence, wichTurn] = useMemo(() => {
+        if (win !== null) {
+            if (win === undefined) return ["Vous avez fait égalité"]
+            else if (win) return ["Vous avez gagné"] 
+            else if (!win) return ["Vous avez perdu"]
+        }
+
         if (count % 2 === whoStart) {
             switch (userType) {
                 case "invite":
@@ -65,7 +70,7 @@ export default function Board ({
                     return ["Tour de l'autre joueur", "creator"]
             }
         }
-    }, [count, whoStart])
+    }, [count, win, whoStart])
 
     function onPlay (col: number, row: number) {
         console.log(col, row);
@@ -79,7 +84,7 @@ export default function Board ({
         
         ws.send(JSON.stringify({
             token,
-            event: "MORPION_PLAY",
+            event: Events.MORPION_PLAY,
             data: {
                 col,
                 row
@@ -87,51 +92,24 @@ export default function Board ({
         }))
     }
 
-    
     useEffect(() => {
         ws.onmessage = (msg) => {
-            let { event, data }: {
-                event: keyof EventsServerData,
-                data: EventsServerData[EventsServer]
-            } = JSON.parse(msg.data)
-
             try {
+                let { event, data }: {
+                    event: keyof EventsServerData,
+                    data: EventsServerData[Events]
+                } = JSON.parse(msg.data)
+
                 console.log(data);
 
                 switch (event) {
-                    case EventsServer.CREATE_TOKEN:
+                    case Events.CREATE_ROOM:
                         data = data as EventsServerData[typeof event]
-                        
-                        token = data.token
-
-                        if (userType === "creator") {
-                            ws.send(JSON.stringify({
-                                token,
-                                event: "CREATE_ROOM",
-                                data: {
-                                    game
-                                }
-                            }))
-                        } else if (userType === "invite") {
-                            ws.send(JSON.stringify({
-                                token,
-                                event: "JOIN_ROOM",
-                                data: {
-                                    inviteCode
-                                }
-                            }))
-                        }
-                        break
-
-                    case EventsServer.CREATE_ROOM:
-                        data = data as EventsServerData[typeof event]
-
-                        console.log(data);
 
                         setInviteCode(data.inviteCode)
                         break
 
-                    case EventsServer.JOIN_ROOM:
+                    case Events.JOIN_ROOM:
                         data = data as EventsServerData[typeof event]
 
                         setInviteJoin(true)
@@ -142,13 +120,18 @@ export default function Board ({
                         setShowCode(false)
                         break
 
-                    case EventsServer.MORPION_PLAY:
+                    case Events.MORPION_PLAY:
+                        data = data as EventsServerData[typeof event]
+                        
+                        setCounter((count) => count + 1)
+                        setBoard(data.board)
+                        break
+
+                    case Events.MORPION_FINISH:
                         data = data as EventsServerData[typeof event]
 
-                        console.log(data);
-                        
-                        setCounter(count + 1)
                         setBoard(data.board)
+                        setWin(() => (data as any).win)
                         break
 
                     default:
@@ -160,9 +143,17 @@ export default function Board ({
         }
 
         return () => {
+            console.count("board render");
+
             ws.onmessage = () => {}
         }
     }, [])
+
+    function backToMenu () {
+        ws.onmessage = () => {}
+
+        setInRoom(false)
+    }
 
     if (gameType === "morpion") return (
         <Morpion
@@ -171,6 +162,8 @@ export default function Board ({
             topSentence={topSentence}
             board={board}
             showCode={showCode}
+            win={win}
+            backToMenu={backToMenu}
         />
     )
     else if (gameType === "4pow") return <FourPow />

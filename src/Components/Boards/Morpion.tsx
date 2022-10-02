@@ -4,6 +4,8 @@ interface Props {
   showCode: boolean;
   onPlay: (col: number, row: number) => void;
   topSentence: string;
+  win: boolean | undefined | null;
+  backToMenu: () => void;
 }
 
 export default function Morpion({
@@ -11,7 +13,9 @@ export default function Morpion({
   inviteCode,
   board,
   onPlay,
-  topSentence
+  topSentence,
+  win,
+  backToMenu
 }: Props) {
   return (
     <div className="morpion flex justify-center place-items-center h-full">
@@ -21,7 +25,7 @@ export default function Morpion({
         {board.map((x, i) => {
           return <div className="cell" id={`${i}`} key={i}>
             {x.map((y, j) => {
-              if (y === "") return (
+              if (y === "" && win === null) return (
                 <div key={j} onClick={() => onPlay(i, j)} className="cursor-pointer">
                   <span></span>
                 </div>
@@ -36,6 +40,7 @@ export default function Morpion({
           </div>
         })}
       </div>
+      { win !== null && <button onClick={() => backToMenu()}className="back-to-menu">Revenir au menu</button> }
     </div>
   )
 }

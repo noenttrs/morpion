@@ -1,6 +1,8 @@
 import { connection } from "websocket"
 
-export enum EventsServer {
+export type Board = string[][]
+
+export enum Events {
     CREATE_TOKEN = "CREATE_TOKEN",
     CREATE_ROOM = "CREATE_ROOM",
     JOIN_ROOM = "JOIN_ROOM",
@@ -10,32 +12,30 @@ export enum EventsServer {
 
 export interface EventsServerData {
     "CREATE_TOKEN": {
-        token: string
+        token: string;
     },
     "CREATE_ROOM": {
-        inviteCode: string
+        inviteCode: string;
     },
     "JOIN_ROOM": {
         whoStart: number;
-        game: "morpion" | "4pow"
+        game: "morpion" | "4pow";
     },
     "MORPION_PLAY": {
-        board: string[][]
+        board: Board;
     },
     "MORPION_FINISH": {
-        whoWin: number
+        board: Board;
+        win: boolean | undefined;
     }
 }
 
-export type EventsClient = "CREATE_ROOM" | "JOIN_ROOM" | "MORPION_PLAY"
-
-
 export interface EventClientData {
     "CREATE_ROOM": {
-        game: "morpion" | "4pow"
+        game: "morpion" | "4pow";
     },
     "JOIN_ROOM": {
-        inviteCode: string
+        inviteCode: string;
     },
     "MORPION_PLAY": {
         col: number;
@@ -50,19 +50,31 @@ export interface User {
         port: number;
     };
     c: connection;
-    room: string;
+    room: string | null;
 }
 
 export interface Game {
     type: "morpion" | "4pow";
+    timestamp: number;
     creator: string;
     invite: string | null;
     whoStart: number;
     count: number;
-    board: string[][];
+    board: Board;
 }
 
 export interface EventFile {
-    eventType: EventsClient;
-    event: (c: connection, data: any, token: string, user: User, users: { [code: string]: User }, games: { [code: string]: Game }) => any;
+    eventType: Events;
+    event: (
+        c: connection,
+        data: any,
+        token: string,
+        user: User,
+        users: { 
+            [code: string]: User 
+        },
+        games: {
+            [code: string]: Game
+        }
+    ) => any;
 }
